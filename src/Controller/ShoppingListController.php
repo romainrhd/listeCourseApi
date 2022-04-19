@@ -10,6 +10,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -87,55 +88,8 @@ class ShoppingListController extends AbstractController
         );
     }
 
-    #[Route('/{id<\d+>}/items', name: 'create_item', methods: 'POST')]
-    public function createItemInOneShoppingList(Request $request, SerializerInterface $serializer, ShoppingListRepository $shoppingListRepository, ManagerRegistry $doctrine, ValidatorInterface $validator, int $id): Response
-    {
-        $shoppingList = $shoppingListRepository->find($id);
-
-        if ($shoppingList === null) {
-            return $this->json(['error' => 'Liste de course n\'existe pas.'], Response::HTTP_NOT_FOUND);
-        }
-
-        $jsonContent = $request->getContent();
-
-        try {
-            $item = $serializer->deserialize($jsonContent, Item::class, 'json');
-        } catch (NotEncodableValueException $e) {
-            return $this->json(
-                ['error' => 'JSON invalide'],
-                Response::HTTP_UNPROCESSABLE_ENTITY
-            );
-        }
-
-        $item->setShoppingList($shoppingList);
-
-        $errors = $validator->validate($item);
-
-        if (count($errors) > 0) {
-            $errorsClean = [];
-            foreach ($errors as $error) {
-                $errorsClean[$error->getPropertyPath()][] = $error->getMessage();
-            };
-
-            return $this->json($errorsClean, Response::HTTP_UNPROCESSABLE_ENTITY);
-        }
-
-        $entityManager = $doctrine->getManager();
-        $entityManager->persist($item);
-        $entityManager->flush();
-
-        return $this->json(
-            $shoppingList,
-            Response::HTTP_CREATED,
-            [
-                'Location' => $this->generateUrl('shoppingLists_show', ['id' => $shoppingList->getId()])
-            ],
-            ['groups' => 'get_one_list']
-        );
-    }
-
-    #[Route('/{idShoppingList<\d+>}/items/{idItem<\d+>}', name: 'update_item', methods: 'PUT')]
-    public function updateItemInOneShoppingList(Request $request, SerializerInterface $serializer, ShoppingListRepository $shoppingListRepository, ItemRepository $itemRepository, ManagerRegistry $doctrine, ValidatorInterface $validator, int $idShoppingList, int $idItem): Response
+    #[Route('/{idShoppingList<\d+>}/items', name: 'create_item', methods: 'POST')]
+    public function createItemInOneShoppingList(Request $request, SerializerInterface $serializer, ShoppingListRepository $shoppingListRepository, ManagerRegistry $doctrine, ValidatorInterface $validator, int $idShoppingList): Response
     {
         $shoppingList = $shoppingListRepository->find($idShoppingList);
 
@@ -143,15 +97,7 @@ class ShoppingListController extends AbstractController
             return $this->json(['error' => 'Liste de course n\'existe pas.'], Response::HTTP_NOT_FOUND);
         }
 
-        $item = $itemRepository->find($idItem);
-
-        if ($item === null) {
-            return $this->json(['error' => 'L\'item n\'existe pas.'], Response::HTTP_NOT_FOUND);
-        }
-
         $jsonContent = $request->getContent();
-
-        dd($item);
 
         try {
             $item = $serializer->deserialize($jsonContent, Item::class, 'json');
@@ -161,8 +107,6 @@ class ShoppingListController extends AbstractController
                 Response::HTTP_UNPROCESSABLE_ENTITY
             );
         }
-
-        dd($item);
 
         $item->setShoppingList($shoppingList);
 
