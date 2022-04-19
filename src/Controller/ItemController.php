@@ -55,7 +55,7 @@ class ItemController extends AbstractController
 
         return $this->json(
             $item->getShoppingList(),
-            Response::HTTP_CREATED,
+            Response::HTTP_ACCEPTED,
             [
                 'Location' => $this->generateUrl('shoppingLists_show', ['id' => $item->getShoppingList()->getId()])
             ],
