@@ -18,8 +18,25 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 #[Route('/api/items', name: 'items_')]
 class ItemController extends AbstractController
 {
+    #[Route('/{itemId<\d+>}', name: 'show', methods: 'GET')]
+    public function getOneItem(ItemRepository $itemRepository, int $itemId): Response
+    {
+        $item = $itemRepository->find($itemId);
+
+        if ($item === null) {
+            return $this->json(['error' => 'L\'item n\'existe pas.'], Response::HTTP_NOT_FOUND);
+        }
+
+        return $this->json(
+            $item,
+            Response::HTTP_OK,
+            [],
+            ['groups' => 'get_one_item']
+        );
+    }
+
     #[Route('/{idItem<\d+>}', name: 'update', methods: 'PUT')]
-    public function updateItemInOneShoppingList(Request $request, SerializerInterface $serializer, ShoppingListRepository $shoppingListRepository, ItemRepository $itemRepository, ManagerRegistry $doctrine, ValidatorInterface $validator, int $idItem): Response
+    public function updateItem(Request $request, SerializerInterface $serializer, ItemRepository $itemRepository, ManagerRegistry $doctrine, ValidatorInterface $validator, int $idItem): Response
     {
         $item = $itemRepository->find($idItem);
 
@@ -54,12 +71,12 @@ class ItemController extends AbstractController
         $entityManager->flush();
 
         return $this->json(
-            $item->getShoppingList(),
+            $item,
             Response::HTTP_ACCEPTED,
             [
-                'Location' => $this->generateUrl('shoppingLists_show', ['id' => $item->getShoppingList()->getId()])
+                'Location' => $this->generateUrl('items_show', ['itemId' => $item->getId()])
             ],
-            ['groups' => 'get_one_list']
+            ['groups' => 'get_one_item']
         );
     }
 }

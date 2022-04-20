@@ -12,15 +12,15 @@ class Item
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
-    #[Groups(['get_one_list'])]
+    #[Groups(['get_one_list', 'get_one_item'])]
     private int $id;
 
     #[ORM\Column(type: 'string', length: 255)]
-    #[Groups(['get_one_list'])]
+    #[Groups(['get_one_list', 'get_one_item'])]
     private string $content;
 
     #[ORM\Column(type: 'boolean')]
-    #[Groups(['get_one_list'])]
+    #[Groups(['get_one_list', 'get_one_item'])]
     private bool $done;
 
     #[ORM\ManyToOne(targetEntity: ShoppingList::class, inversedBy: 'items')]
