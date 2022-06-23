@@ -4,13 +4,11 @@ namespace App\Controller;
 
 use App\Entity\Item;
 use App\Entity\ShoppingList;
-use App\Repository\ItemRepository;
 use App\Repository\ShoppingListRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -23,6 +21,19 @@ class ShoppingListController extends AbstractController
     public function getAllShoppingLists(ShoppingListRepository $shoppingListRepository): Response
     {
         $shoppingLists = $shoppingListRepository->findAll();
+
+        return $this->json(
+            $shoppingLists,
+            Response::HTTP_OK,
+            [],
+            ['groups' => 'get_all_lists']
+        );
+    }
+
+    #[Route('/not-archived', name: 'not-archived', methods: 'GET')]
+    public function getShoppingListsNotArchvied(ShoppingListRepository $shoppingListRepository): Response
+    {
+        $shoppingLists = $shoppingListRepository->findBy(['archived' => false]);
 
         return $this->json(
             $shoppingLists,
