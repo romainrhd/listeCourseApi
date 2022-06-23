@@ -134,4 +134,33 @@ class ShoppingListController extends AbstractController
             ['groups' => 'get_one_list']
         );
     }
+
+    #[Route('/{idShoppingList<\d+>}/archive', name: 'archive', methods: 'PUT')]
+    public function archivedShoppingList(Request $request, SerializerInterface $serializer, ShoppingListRepository $shoppingListRepository, ManagerRegistry $doctrine, ValidatorInterface $validator, int $idShoppingList): Response
+    {
+        $shoppingList = $shoppingListRepository->find($idShoppingList);
+
+        if ($shoppingList === null) {
+            return $this->json(['error' => 'Liste de course n\'existe pas.'], Response::HTTP_NOT_FOUND);
+        }
+
+        if ($shoppingList->getArchived()) {
+            return $this->json(['error'=> 'Cette liste est déjà archivée'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $shoppingList->setArchived(true);
+
+        $entityManager = $doctrine->getManager();
+        $entityManager->persist($shoppingList);
+        $entityManager->flush();
+
+        return $this->json(
+            $shoppingList,
+            Response::HTTP_CREATED,
+            [
+                'Location' => $this->generateUrl('shoppingLists_show', ['id' => $shoppingList->getId()])
+            ],
+            ['groups' => 'get_one_list']
+        );
+    }
 }

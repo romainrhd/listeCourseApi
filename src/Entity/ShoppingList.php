@@ -23,6 +23,11 @@ class ShoppingList
     #[Groups(['get_all_lists', 'get_one_list'])]
     private string $name;
 
+    #[Assert\NotBlank]
+    #[ORM\Column(type: 'boolean', options: ["default" => false])]
+    #[Groups(['get_all_lists', 'get_one_list'])]
+    private bool $archived = false;
+
     #[ORM\OneToMany(mappedBy: 'shoppingList', targetEntity: Item::class)]
     #[Groups(['get_one_list'])]
     private $items;
@@ -45,6 +50,18 @@ class ShoppingList
     public function setName(string $name): self
     {
         $this->name = $name;
+
+        return $this;
+    }
+
+    public function getArchived(): ?bool
+    {
+        return $this->archived;
+    }
+
+    public function setArchived(bool $archived): self
+    {
+        $this->archived = $archived;
 
         return $this;
     }
