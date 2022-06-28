@@ -7,16 +7,17 @@ use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Serializer\Exception\NotEncodableValueException;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Serializer\Exception\NotEncodableValueException;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-#[Route('/api/auth', name: 'auth_')]
+#[Route('/api', name: 'auth_')]
 class AuthController extends AbstractController
 {
     #[Route('/register', name: 'register', methods: 'POST')]
-    public function register(Request $request, SerializerInterface $serializer, ManagerRegistry $doctrine, ValidatorInterface $validator): Response
+    public function register(Request $request, SerializerInterface $serializer, ManagerRegistry $doctrine, ValidatorInterface $validator, UserPasswordHasherInterface $passwordHasher): Response
     {
         $jsonContent = $request->getContent();
 
@@ -31,6 +32,7 @@ class AuthController extends AbstractController
 
         $errors = $validator->validate($user);
 
+
         if (count($errors) > 0) {
             $errorsClean = [];
             foreach ($errors as $error) {
@@ -40,7 +42,7 @@ class AuthController extends AbstractController
             return $this->json($errorsClean, Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        // TODO : Hashpassword
+        $user->setPassword($passwordHasher->hashPassword($user, $user->getPassword()));
 
         $entityManager = $doctrine->getManager();
         $entityManager->persist($user);
@@ -48,11 +50,7 @@ class AuthController extends AbstractController
 
         return $this->json(
             $user,
-            Response::HTTP_CREATED,
-            [
-                'Location' => $this->generateUrl('shoppingLists_show', ['id' => $user->getId()])
-            ],
-            ['groups' => 'get_one_list']
+            Response::HTTP_CREATED
         );
     }
 }

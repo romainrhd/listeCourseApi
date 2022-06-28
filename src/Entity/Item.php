@@ -25,7 +25,7 @@ class Item
 
     #[ORM\ManyToOne(targetEntity: ShoppingList::class, inversedBy: 'items')]
     #[ORM\JoinColumn(nullable: false)]
-    private $shoppingList;
+    private ShoppingList $shoppingList;
 
     public function getId(): ?int
     {
