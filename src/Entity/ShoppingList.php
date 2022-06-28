@@ -2,10 +2,10 @@
 
 namespace App\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\ShoppingListRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -30,7 +30,7 @@ class ShoppingList
 
     #[ORM\OneToMany(mappedBy: 'shoppingList', targetEntity: Item::class)]
     #[Groups(['get_one_list'])]
-    private $items;
+    private Collection $items;
 
     public function __construct()
     {
