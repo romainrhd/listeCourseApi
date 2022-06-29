@@ -16,7 +16,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/api/items', name: 'items_')]
-class ItemController extends AbstractController
+class ItemController extends CoreController
 {
     #[Route('/{itemId<\d+>}', name: 'show', methods: 'GET')]
     public function getOneItem(ItemRepository $itemRepository, int $itemId): Response

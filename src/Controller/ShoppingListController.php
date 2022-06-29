@@ -4,36 +4,26 @@ namespace App\Controller;
 
 use App\Entity\Item;
 use App\Entity\ShoppingList;
-use App\Repository\ShoppingListRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use App\Repository\ShoppingListRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Serializer\Exception\NotEncodableValueException;
 
 #[Route('/api/shopping-lists', name: 'shoppingLists_')]
-class ShoppingListController extends AbstractController
+class ShoppingListController extends CoreController
 {
     #[Route('/', name: 'all', methods: 'GET')]
-    public function getAllShoppingLists(ShoppingListRepository $shoppingListRepository): Response
+    public function getAllShoppingLists(Request $request, ShoppingListRepository $shoppingListRepository): Response
     {
-        $shoppingLists = $shoppingListRepository->findAll();
-
-        return $this->json(
-            $shoppingLists,
-            Response::HTTP_OK,
-            [],
-            ['groups' => 'get_all_lists']
+        // Get shopping list of current user
+        $shoppingLists = $shoppingListRepository->findByUser(
+            $this->tokenStorage->getToken()->getUser()->getId(),
+            $request->get('archived')
         );
-    }
-
-    #[Route('/not-archived', name: 'not-archived', methods: 'GET')]
-    public function getShoppingListsNotArchvied(ShoppingListRepository $shoppingListRepository): Response
-    {
-        $shoppingLists = $shoppingListRepository->findBy(['archived' => false]);
 
         return $this->json(
             $shoppingLists,

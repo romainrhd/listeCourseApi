@@ -45,22 +45,21 @@ class ShoppingListRepository extends ServiceEntityRepository
         }
     }
 
-    // /**
-    //  * @return ShoppingList[] Returns an array of ShoppingList objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    /**
+     * @return ShoppingList[] Returns an array of ShoppingList objects
+     */
+    public function findByUser(int $userId, bool $archived)
     {
         return $this->createQueryBuilder('s')
-            ->andWhere('s.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('s.id', 'ASC')
-            ->setMaxResults(10)
+            ->innerJoin('s.users', 'u')
+            ->andWhere('u.id = :userId')
+            ->setParameter('userId', $userId)
+            ->andWhere('s.archived = :archived')
+            ->setParameter('archived', $archived)
             ->getQuery()
             ->getResult()
         ;
     }
-    */
 
     /*
     public function findOneBySomeField($value): ?ShoppingList

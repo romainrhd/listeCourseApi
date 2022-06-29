@@ -14,7 +14,7 @@ use Symfony\Component\Serializer\Exception\NotEncodableValueException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 #[Route('/api', name: 'auth_')]
-class AuthController extends AbstractController
+class AuthController extends CoreController
 {
     #[Route('/register', name: 'register', methods: 'POST')]
     public function register(Request $request, SerializerInterface $serializer, ManagerRegistry $doctrine, ValidatorInterface $validator, UserPasswordHasherInterface $passwordHasher): Response
